@@ -1,0 +1,2 @@
+{:css-dirs ["resources/public"]
+ :ring-server-options {:port 8765}}

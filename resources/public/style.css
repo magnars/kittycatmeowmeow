@@ -1,0 +1,15 @@
+body {
+    background: black;
+    color: white;
+}
+img {max-width: 100%;}
+a {color: lightblue;}
+
+button {
+    font-size: 24px;
+    padding: 5px;
+    width: 180px;
+    margin: 5px;
+}
+
+.right-img {width: 30%; float: right;}
