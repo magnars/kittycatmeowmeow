@@ -17,14 +17,12 @@
                          (rand-int 56)
                          (str first-number second-number)])}))
 
-(defonce status (atom {:remaining-lives 2
-                       :questions-left 11
+(defonce status (atom {:remaining-lives 3
+                       :questions-left 12
                        :hermione-img "good-luck.png"
                        :current-question (create-addition-question)}))
 
 (defn check-answer [question answer]
-  #_(js/alert (str "Meow, you answered " answer "!"
-                 " The correct answer is " (:correct-answer question)))
   (swap! status assoc :hermione-img
    (if (= answer (:correct-answer question))
      "yay.png"
@@ -34,7 +32,7 @@
   (let [question (:current-question status)]
     [:div
      [:img.right-img {:src (:hermione-img status)}]
-     [:h1 "KittyCatMeowMeow Math Game"]
+     [:h1 "KittyCat­MeowMeow Math Game"]
      [:p "You have " (:remaining-lives status) " lives. There are " (:questions-left status) " questions left."]
      [:h2
       "What is "
@@ -43,7 +41,8 @@
       (:second-number question)
       "?"]
      (for [answer (:possible-answers question)]
-       [:button {:onClick #(check-answer question answer)} answer])]))
+       [:button {:onClick #(check-answer question answer)}
+        answer])]))
 
 (defn render [state]
   (dumdom/render [game state] container))
