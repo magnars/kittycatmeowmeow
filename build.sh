@@ -1,2 +1,2 @@
 rm -rf build
-cp -R public build && echo "Done building kittycatmeowmeow"
+cp -R resources/public build && echo "Done building kittycatmeowmeow"
