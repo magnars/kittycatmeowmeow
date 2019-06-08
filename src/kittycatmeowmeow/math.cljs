@@ -1,5 +1,7 @@
 (ns kittycatmeowmeow.math
-  (:require [dumdom.core :as dumdom :refer [defcomponent]]))
+  (:require [cljs.core.async :refer [<! timeout]]
+            [dumdom.core :as dumdom :refer [defcomponent]])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defonce container (js/document.getElementById "app"))
 
@@ -16,36 +18,86 @@
                          correct-answer
                          (rand-int 56)
                          (str first-number second-number)])}))
+(defonce status (atom nil))
 
-(defonce status (atom {:remaining-lives 3
-                       :questions-left 12
-                       :hermione-img "good-luck.png"
-                       :current-question (create-addition-question)}))
+(defn start-game []
+  (reset! status
+          {:remaining-lives 3
+           :questions-left 12
+           :hermione-img "good-luck.png"
+           :current-question (create-addition-question)}))
 
 (defn check-answer [question answer]
-  (swap! status assoc :hermione-img
-   (if (= answer (:correct-answer question))
-     "yay.png"
-     "ohno.png")))
+  (let [correct-answer? (= answer (:correct-answer question))]
+    (go
+      (swap! status assoc
+             :hermione-img (if correct-answer?
+                             "yay.png"
+                             "ohno.png")
+             :show-correct-answer? true)
+      (<! (timeout (if correct-answer? 800 2000)))
+      (cond
+        (and (= 1 (:questions-left @status))
+             correct-answer?)
+        (reset! status {:won-the-game!!!!! true
+                        :hermione-img "you-did-it.gif"})
+
+        (and (= 1 (:remaining-lives @status))
+             (not correct-answer?))
+        (reset! status {:lost-the-game!!!!!!!!!!!! true
+                        :hermione-img "oops.gif"})
+
+        :else
+        (swap! status #(-> %
+                           (assoc :hermione-img "good-luck.png")
+                           (assoc :current-question (create-addition-question))
+                           (assoc :show-correct-answer? false)
+                           (cond-> correct-answer?
+                             (update :questions-left dec))
+                           (cond-> (not correct-answer?)
+                             (update :remaining-lives dec))
+                           ))))))
 
 (defcomponent game [status]
   (let [question (:current-question status)]
     [:div
      [:img.right-img {:src (:hermione-img status)}]
      [:h1 "KittyCat­MeowMeow Math Game"]
-     [:p "You have " (:remaining-lives status) " lives. There are " (:questions-left status) " questions left."]
-     [:h2
-      "What is "
-      (:first-number question)
-      (:operation question)
-      (:second-number question)
-      "?"]
-     (for [answer (:possible-answers question)]
-       [:button {:onClick #(check-answer question answer)}
-        answer])]))
+     (when (:won-the-game!!!!! status)
+       [:p "You did it! Congratulations! You are really good at math!"])
+     (when (:lost-the-game!!!!!!!!!!!! status)
+       [:p "Oh, no! You lost the game! Maybe you want to try again?"])
+     (when question
+       [:div
+        [:p
+         (if (= 1 (:remaining-lives status))
+           [:span "This is your last life! Don't get wrong! "]
+           [:span "You have " (:remaining-lives status) " lives. "])
+         (if (= 1 (:questions-left status))
+           [:span "This is the final question!"]
+           [:span "There are " (:questions-left status) " questions left."])]
+        [:h2
+         "What is "
+         (:first-number question)
+         (:operation question)
+         (:second-number question)
+         "?"]
+        (for [answer (:possible-answers question)]
+          [:button {:className (when (and (:show-correct-answer? status)
+                                          (= answer (:correct-answer question)))
+                                 "correct")
+                    :onClick #(check-answer question answer)}
+           answer])])
+     (when (not question)
+       [:button {:onClick start-game}
+        "Play Again"])
+
+     ]))
 
 (defn render [state]
   (dumdom/render [game state] container))
+
+(defonce start-it (do (start-game) :started))
 
 (add-watch status ::me (fn [_ _ _ new-state]
                          (render new-state)))

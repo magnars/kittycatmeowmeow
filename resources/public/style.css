@@ -14,4 +14,9 @@ button {
     margin: 5px;
 }
 
+button.correct {
+    background: #6c6;
+    transition: background 500ms;
+}
+
 .right-img {width: 30%; float: right;}
