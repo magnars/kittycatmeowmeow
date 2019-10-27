@@ -3,8 +3,6 @@
             [dumdom.core :as dumdom :refer [defcomponent]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defonce container (js/document.getElementById "app"))
-
 (defn create-addition-question []
   (let [first-number (+ 1 (rand-int 20))
         second-number (+ 1 (rand-int 20))
@@ -94,12 +92,14 @@
 
      ]))
 
-(defn render [state]
+(defn render [state container]
   (dumdom/render [game state] container))
 
-(defonce start-it (do (start-game) :started))
-
-(add-watch status ::me (fn [_ _ _ new-state]
-                         (render new-state)))
+(defn start! [container]
+  (js/console.log 'started-math-game)
+  (start-game)
+  (add-watch status ::me (fn [_ _ _ new-state]
+                           (render new-state container)))
+  (render @status container))
 
 (swap! status update ::reload (fnil inc 0))

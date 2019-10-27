@@ -1,4 +1,4 @@
-{:main kittycatmeowmeow.math
+{:main kittycatmeowmeow.main
  :optimizations :none
  :pretty-print true
  :source-map true
