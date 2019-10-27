@@ -1,0 +1,5 @@
+{:main kittycatmeowmeow.main
+ :optimizations :advanced
+ :asset-path "/js/prod2"
+ :output-to "resources/public/js/prod2.js"
+ :output-dir "resources/public/js/prod2"}
