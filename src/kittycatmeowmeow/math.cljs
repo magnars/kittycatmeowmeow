@@ -96,7 +96,6 @@
   (dumdom/render [game state] container))
 
 (defn start! [container]
-  (js/console.log 'started-math-game)
   (start-game)
   (add-watch status ::me (fn [_ _ _ new-state]
                            (render new-state container)))
